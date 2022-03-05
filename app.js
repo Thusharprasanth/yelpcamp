@@ -50,9 +50,9 @@ passport.deserializeUser(User.deserializeUser())
 
 app.engine('ejs', ejsMate)
 
-app.get('/',(req,res)=>{
-    res.render('home')
-})
+// app.get('/',(req,res)=>{
+//     res.render('home')
+// })
 
 app.use((req,res,next)=>{
     res.locals.currentUser = req.user
