@@ -4,13 +4,24 @@ const catchAsync = require('../utils/AsyncCatch');
 const Campground = require("../models/Campground");
 const {isLoggedIn, isAuthor,validateCampground} = require('../middleware')
 const campgroundController = require('../controllers/campgrounds')
+const multer  = require('multer')
+const upload = multer({ dest: 'uploads/' })
 
-router.get('/', catchAsync(campgroundController.index))
-router.post('/',  validateCampground, catchAsync(campgroundController.createCampground))
+router.route('/')
+    .get(catchAsync(campgroundController.index))
+    // .post(validateCampground, catchAsync(campgroundController.createCampground))
+    .post(upload.array('image'), (req, res) =>{
+        res.send(req.files);
+      })
+    
+
 router.get('/new',isLoggedIn, campgroundController.renderNewForm)
+
 router.get('/:id/edit',isLoggedIn,catchAsync(campgroundController.renderEditForm))
-router.get('/:id', catchAsync(campgroundController.showCampground))
-router.put('/:id',isLoggedIn, isAuthor,validateCampground,catchAsync(campgroundController.editCampground))
-router.delete('/:id',isLoggedIn, isAuthor,catchAsync(campgroundController.deleteCampground))
+
+router.route('/:id')
+    .get(catchAsync(campgroundController.showCampground))
+    .put(isLoggedIn, isAuthor,validateCampground,catchAsync(campgroundController.editCampground))
+    .delete(isLoggedIn, isAuthor,catchAsync(campgroundController.deleteCampground))
 
 module.exports = router
