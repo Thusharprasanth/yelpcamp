@@ -5,23 +5,20 @@ const Campground = require("../models/Campground");
 const {isLoggedIn, isAuthor,validateCampground} = require('../middleware')
 const campgroundController = require('../controllers/campgrounds')
 const multer  = require('multer')
-const upload = multer({ dest: 'uploads/' })
+const { storage } = require('../cloudinary')
+const upload = multer({ storage })
 
 router.route('/')
     .get(catchAsync(campgroundController.index))
-    // .post(validateCampground, catchAsync(campgroundController.createCampground))
-    .post(upload.array('image'), (req, res) =>{
-        res.send(req.files);
-      })
+    .post(isLoggedIn, upload.array('image'), validateCampground,catchAsync(campgroundController.createCampground))
     
-
 router.get('/new',isLoggedIn, campgroundController.renderNewForm)
 
 router.get('/:id/edit',isLoggedIn,catchAsync(campgroundController.renderEditForm))
 
 router.route('/:id')
     .get(catchAsync(campgroundController.showCampground))
-    .put(isLoggedIn, isAuthor,validateCampground,catchAsync(campgroundController.editCampground))
+    .put(isLoggedIn, isAuthor,upload.array('image'),validateCampground,catchAsync(campgroundController.editCampground))
     .delete(isLoggedIn, isAuthor,catchAsync(campgroundController.deleteCampground))
 
 module.exports = router

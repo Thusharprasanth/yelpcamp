@@ -2,15 +2,10 @@
 <div class="row">
   <h1 class="text-center">New Campground</h1>
   <div class="col-md-6 offset-3">
-    <form action="/campgrounds/<%= campground._id %>?_method=PUT" method="post" novalidate class="validated-form">
+    <form action="/campgrounds/<%= campground._id %>?_method=PUT" method="post" novalidate class="validated-form" enctype="multipart/form-data">
       <div class="mb-3">
         <label class="form-label" for="title">Title : </label>
-        <input
-          value="<%= campground.title %>"
-          class="form-control"
-          name="campground[title]"
-          type="text"
-          id="title"
+        <input value="<%= campground.title %>" class="form-control" name="campground[title]" type="text" id="title"
         />
         <div class="valid-feedback">
             Looks good!
@@ -30,14 +25,8 @@
         />
       </div>
       <div class="mb-3">
-        <label class="form-label" for="image">Image URL : </label>
-        <input
-          value="<%= campground.image %>"
-          class="form-control"
-          name="campground[image]"
-          type="text"
-          id="image"
-        />
+        <label class="form-label" for="image">Upload Image : </label>
+        <input type="file" name="image" id="image" multiple>
       </div>
       <div class="mb-3">
         <label for="price" class="form-label">Campground Price</label>
