@@ -1,4 +1,4 @@
-if(process.env.NODE_ENV !== 'production'){
+if (process.env.NODE_ENV !== 'production') {
     require('dotenv').config()
 }
 
@@ -15,31 +15,35 @@ const flash = require('connect-flash')
 const passport = require('passport')
 const LocalStratergy = require('passport-local')
 const User = require('./models/user')
+const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require('helmet')
 
-mongoose.connect('mongodb://localhost:27017/yelp-camp', {useNewUrlParser:true, useUnifiedTopology:true});
+mongoose.connect('mongodb://localhost:27017/yelp-camp', { useNewUrlParser: true, useUnifiedTopology: true });
 
 const db = mongoose.connection
 db.on('error', console.error.bind(console, "connection error:"));
-db.once("open",()=>{
+db.once("open", () => {
     console.log("Database connected");
 })
 
 const app = express()
 
 app.set('view engine', 'ejs')
-app.use(express.urlencoded({extended:true}))
+app.use(express.urlencoded({ extended: true }))
 
 app.use(methodOverride('_method'))
 app.use(express.static('public'))
+app.use(mongoSanitize());
+app.use(helmet({ contentSecurityPolicy : false }))
 
 const sessionConfig = {
-    secret:'thisshouldbeabettersecret',
-    resave:false,
-    saveUninitialized:true,
-    cookie:{
-        httpOnly : true,
-        expires : Date.now() + 1000*60*60*24*7,
-        maxAge : 1000*60*60*24*7
+    secret: 'thisshouldbeabettersecret',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+        httpOnly: true,
+        expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+        maxAge: 1000 * 60 * 60 * 24 * 7
     }
 }
 
@@ -59,29 +63,30 @@ app.engine('ejs', ejsMate)
 //     res.render('home')
 // })
 
-app.use((req,res,next)=>{
+app.use((req, res, next) => {
     res.locals.currentUser = req.user
     res.locals.success = req.flash('success')
     res.locals.error = req.flash('error')
     next()
 })
 
+
 app.use('/', userRoutes)
 app.use('/campgrounds', campgroundsRoutes)
 app.use('/campgrounds/:id/review', reviewsRoutes)
-app.get('',(req,res)=>{
+app.get('', (req, res) => {
     res.render('home')
 })
 
-app.all('*', (req,res,next)=>{
-    next(new ExpressError('Page not found',404))
+app.all('*', (req, res, next) => {
+    next(new ExpressError('Page not found', 404))
 })
 
-app.use((err,req,res,next)=>{
-    const { statusCode=500, message = 'Something went wrong' } = err
+app.use((err, req, res, next) => {
+    const { statusCode = 500, message = 'Something went wrong' } = err
     res.status(statusCode).render('err', { err })
 })
 
-app.listen(3000, ()=>{
+app.listen(3000, () => {
     console.log('Listening port 3000...');
 })
